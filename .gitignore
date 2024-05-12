@@ -1,0 +1,8 @@
+# compile residues
+obj
+
+# Vulkan SDK - download from here: https://www.lunarg.com/vulkan-sdk/
+deps/include/vulkan-sdk
+
+# vscode stuff
+.vscode
