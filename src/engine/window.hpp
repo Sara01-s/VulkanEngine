@@ -32,6 +32,10 @@ namespace Engine {
             _frameBufferResized = false;
         }
 
+        GLFWwindow* GetWindow() const {
+            return _window;
+        }
+
         void CreateWindowSurface(VkInstance vkInstance, VkSurfaceKHR* vkSurface); 
 
     private:

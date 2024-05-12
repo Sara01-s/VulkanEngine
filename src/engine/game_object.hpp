@@ -10,7 +10,7 @@
 namespace Engine {
 
     struct TransformComponent {
-        glm::vec3 Translation {}; // position offset
+        glm::vec3 Position {}; // translation offset
         glm::vec3 Scale { 1.0f, 1.0f, 1.0f };
         glm::vec3 Rotation;
 
@@ -44,12 +44,12 @@ namespace Engine {
                     Scale.z * (c1 * c2),
                     0.0f,
                 },
-                { Translation.x, Translation.y, Translation.z, 1.0f }
+                { Position.x, Position.y, Position.z, 1.0f }
                 };
         }
 
         glm::mat4 GetMat4Slow() {
-            auto transform = glm::translate(glm::mat4 { 1.0f }, Translation);
+            auto transform = glm::translate(glm::mat4 { 1.0f }, Position);
 
             // Tait-Bryan angles YXZ (Euler rotation)
             transform = glm::rotate(transform, Rotation.y, { 0.0f, 1.0f, 0.0f });

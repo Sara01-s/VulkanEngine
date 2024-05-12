@@ -1,6 +1,6 @@
 #pragma once
 
-// libs
+#include "camera.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
 #include "pipeline.hpp"
@@ -19,7 +19,7 @@ namespace Engine {
         RenderSystem(const RenderSystem&) = delete;
         RenderSystem& operator=(const RenderSystem&) = delete;
 
-        void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects);
+        void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera);
 
     private:
         void CreatePipelineLayout();

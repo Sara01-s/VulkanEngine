@@ -56,16 +56,15 @@ namespace Engine {
         );
     }
 
-    void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects) {
+    void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera) {
         _pipeline->Bind(commandBuffer);
 
-        for (auto& obj : gameObjects) {
-            obj.Transform.Rotation.y = glm::mod(obj.Transform.Rotation.y + 0.01f, glm::two_pi<float>());
-            obj.Transform.Rotation.x = glm::mod(obj.Transform.Rotation.x + 0.005f, glm::two_pi<float>());
+        auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 
+        for (auto& obj : gameObjects) {
             SimplePushConstantData push {};
             push.Color = obj.Color;
-            push.Transform = obj.Transform.GetMat4();
+            push.Transform = projectionView * obj.Transform.GetMat4();
 
             vkCmdPushConstants (
                 commandBuffer, 

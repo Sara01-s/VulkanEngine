@@ -416,7 +416,7 @@ void Device::createBuffer(
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
   if (vkCreateBuffer(device_, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create vertex buffer!");
+    throw std::runtime_error("Failed to create vertex buffer!");
   }
 
   VkMemoryRequirements memRequirements;
@@ -428,7 +428,7 @@ void Device::createBuffer(
   allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
   if (vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate vertex buffer memory!");
+    throw std::runtime_error("Failed to allocate vertex buffer memory!");
   }
 
   vkBindBufferMemory(device_, buffer, bufferMemory, 0);
@@ -523,11 +523,11 @@ void Device::createImageWithInfo(
   allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
   if (vkAllocateMemory(device_, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate image memory!");
+    throw std::runtime_error("Failed to allocate image memory!");
   }
 
   if (vkBindImageMemory(device_, image, imageMemory, 0) != VK_SUCCESS) {
-    throw std::runtime_error("failed to bind image memory!");
+    throw std::runtime_error("Failed to bind image memory!");
   }
 }
 

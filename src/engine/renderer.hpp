@@ -30,6 +30,10 @@ namespace Engine {
             return _swapChain->getRenderPass();
         }
 
+        float GetAspectRatio() const {
+            return _swapChain->extentAspectRatio();
+        }
+
         bool IsFrameInProgress() const {
             return _isFrameStarted;
         }
