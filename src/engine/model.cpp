@@ -54,17 +54,29 @@ namespace Engine {
 
         _device.createBuffer (
             vertexBufferSize,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // HOST = CPU, DEVICE = GPU, 1st property makes memory accesible from cpu, 2nd property keeps the cpu and gpu regions consistent (or updated) with each other, if this property is abstent, then we are required to call VkFlushMapMemoryRanges() in order to propagate changes from cpu to gpu.
+            stagingBuffer,
+            stagingBufferMemory
+        );
+
+        void* indexData;
+        vkMapMemory(_device.device(), stagingBufferMemory, 0, vertexBufferSize, 0, &indexData);
+        memcpy(indexData, vertices.data(), static_cast<size_t>(vertexBufferSize));
+        vkUnmapMemory(_device.device(), stagingBufferMemory);
+        
+        _device.createBuffer (
+            vertexBufferSize,
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             _vertexBuffer,
             _vertexBufferMemory
         );
 
-        void* vertexData;
-        vkMapMemory(_device.device(), _vertexBufferMemory, 0, vertexBufferSize, 0, &vertexData);
-        memcpy(vertexData, vertices.data(), static_cast<size_t>(vertexBufferSize));
+        _device.copyBuffer(stagingBuffer, _vertexBuffer, vertexBufferSize);
 
-        vkUnmapMemory(_device.device(), _vertexBufferMemory);
+        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
+        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
     void Model::CreateIndexBuffer(const std::vector<uint32_t> &indices) {
@@ -77,19 +89,34 @@ namespace Engine {
 
         VkDeviceSize indexBufferSize = sizeof(indices[0]) * _indexCount;
 
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+
         _device.createBuffer (
             indexBufferSize,
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // HOST = CPU, DEVICE = GPU, 1st property makes memory accesible from cpu, 2nd property keeps the cpu and gpu regions consistent (or updated) with each other, if this property is abstent, then we are required to call VkFlushMapMemoryRanges() in order to propagate changes from cpu to gpu.
+            stagingBuffer,
+            stagingBufferMemory
+        );
+
+        void* indexData;
+        vkMapMemory(_device.device(), stagingBufferMemory, 0, indexBufferSize, 0, &indexData);
+        memcpy(indexData, indices.data(), static_cast<size_t>(indexBufferSize));
+        vkUnmapMemory(_device.device(), stagingBufferMemory);
+        
+        _device.createBuffer (
+            indexBufferSize,
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             _indexBuffer,
             _indexBufferMemory
         );
 
-        void* indexData;
-        vkMapMemory(_device.device(), _indexBufferMemory, 0, indexBufferSize, 0, &indexData);
-        memcpy(indexData, indices.data(), static_cast<size_t>(indexBufferSize));
+        _device.copyBuffer(stagingBuffer, _indexBuffer, indexBufferSize);
 
-        vkUnmapMemory(_device.device(), _indexBufferMemory);
+        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
+        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
     }
 
     std::vector<VkVertexInputBindingDescription> Model::Vertex::GetBindingDescriptions() {
