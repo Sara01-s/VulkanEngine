@@ -83,7 +83,7 @@ namespace Engine {
         _indexCount = static_cast<uint32_t>(indices.size());
         _hasIndexBuffer = _indexCount > 0;
 
-        if (_hasIndexBuffer) {
+        if (!_hasIndexBuffer) {
             return;
         }
 
