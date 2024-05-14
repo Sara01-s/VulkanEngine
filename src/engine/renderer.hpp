@@ -11,6 +11,7 @@
 #include <cassert>
 
 namespace Engine {
+
     class Renderer {
 
     public:
@@ -64,4 +65,5 @@ namespace Engine {
         int _currentFrameIndex;
         bool _isFrameStarted { false };
     };
+    
 } // namespace Engine

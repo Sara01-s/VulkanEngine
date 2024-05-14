@@ -5,6 +5,7 @@
 #include <limits>
 
 namespace Engine {
+    
     void Camera::SetOrtographicProjection(float left, float right, float top, float bottom, float near, float far) {
         _projectionMatrix = glm::mat4 { 1.0f };
         _projectionMatrix[0][0] = 2.0f / (right - left);

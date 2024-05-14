@@ -55,4 +55,5 @@ namespace Engine {
         VkShaderModule _vertShaderModule;
         VkShaderModule _fragShaderModule;
     };
+    
 } // namespace Engine

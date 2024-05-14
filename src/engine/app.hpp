@@ -11,6 +11,7 @@
 #include <vector>
 
 namespace Engine {
+    
     class App {
 
     public:
@@ -36,4 +37,5 @@ namespace Engine {
 
         std::vector<GameObject> _gameObjects;
     };
+
 } // namespace Engine

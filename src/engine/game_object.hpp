@@ -1,7 +1,8 @@
 #pragma once
 
-// libs
 #include "model.hpp"
+
+// libs
 #include <glm/gtc/matrix_transform.hpp>
 
 // std
@@ -45,7 +46,7 @@ namespace Engine {
                     0.0f,
                 },
                 { Position.x, Position.y, Position.z, 1.0f }
-                };
+            };
         }
 
         glm::mat4 GetMat4Slow() {

@@ -1,6 +1,33 @@
 #include "model.hpp"
+
+#include "utils.h"
+
+// libs
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tinyobj/tiny_obj_loader.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
+// std
+#include <stdexcept>
 #include <cassert>
 #include <cstring>
+#include <unordered_map>
+
+namespace std {
+
+    template<>
+    struct hash<Engine::Model::Vertex> {
+        size_t operator()(const Engine::Model::Vertex& vertex) const {
+            size_t seed = 0;
+            Engine::hashCombine(seed, vertex.Position, vertex.Color, vertex.UV);
+
+            return seed;
+        }
+    };
+    
+} // namespace std
+
 
 namespace Engine {
     
@@ -19,6 +46,13 @@ namespace Engine {
             vkDestroyBuffer(_device.device(), _indexBuffer, nullptr);
             vkFreeMemory(_device.device(), _indexBufferMemory, nullptr);
         }
+    }
+
+    std::unique_ptr<Model> Model::CreateModelFromFile(Device &device, const std::string filepath) {
+        Data data {};
+        data.LoadModel(filepath);
+
+        return std::make_unique<Model>(device, data);
     }
 
     void Model::Bind(VkCommandBuffer commandBuffer) {
@@ -143,6 +177,73 @@ namespace Engine {
         attributeDescriptions[1].offset = offsetof(Vertex, Color);
 
         return attributeDescriptions;
+    }
+
+    void Model::Data::LoadModel(const std::string &filepath) {
+        tinyobj::attrib_t modelAttributes;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string warn;
+        std::string error;
+
+        if (!tinyobj::LoadObj(&modelAttributes, &shapes, &materials, &warn, &error, filepath.c_str())) {
+            throw std::runtime_error(warn + error);
+        }
+
+        Vertices.clear();
+        Indices.clear();
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices {};
+
+        for (const auto& shape : shapes) {
+            for (const auto& index : shape.mesh.indices) {
+
+                Vertex vertex {};
+
+                if (index.vertex_index >= 0) {
+                    vertex.Position = {
+                        modelAttributes.vertices[3 * index.vertex_index + 0],
+                        modelAttributes.vertices[3 * index.vertex_index + 1],
+                        modelAttributes.vertices[3 * index.vertex_index + 2]
+                    };
+
+                    auto colorIndex = 3 * index.vertex_index + 2;
+
+                    if (colorIndex < modelAttributes.colors.size()) {
+                        vertex.Color = {
+                            modelAttributes.colors[colorIndex - 2],
+                            modelAttributes.colors[colorIndex - 1],
+                            modelAttributes.colors[colorIndex - 0]
+                        };
+                    }
+                    else {
+                        vertex.Color = { 1.0f, 1.0f, 1.0f }; // default color
+                    }
+                }
+
+                if (index.normal_index >= 0) {
+                    vertex.Normal = {
+                        modelAttributes.normals[3 * index.normal_index + 0],
+                        modelAttributes.normals[3 * index.normal_index + 1],
+                        modelAttributes.normals[3 * index.normal_index + 2]
+                    };
+                }
+
+                if (index.texcoord_index >= 0) {
+                    vertex.UV = {
+                        modelAttributes.texcoords[2 * index.texcoord_index + 0],
+                        modelAttributes.texcoords[2 * index.texcoord_index + 1],
+                    };
+                }
+
+                if (uniqueVertices.count(vertex) == 0) {
+                    uniqueVertices[vertex] = static_cast<uint32_t>(Vertices.size());
+                    Vertices.push_back(vertex);
+                }
+
+                Indices.push_back(uniqueVertices[vertex]);
+            }
+        }
     }
 
 } // namespace Engine

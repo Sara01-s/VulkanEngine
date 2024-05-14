@@ -10,6 +10,7 @@
 #include <vector>
 
 namespace Engine {
+
     class RenderSystem {
 
     public:
@@ -31,4 +32,5 @@ namespace Engine {
         std::unique_ptr<Pipeline> _pipeline;
         VkPipelineLayout _pipelineLayout;
     };
+    
 } // namespace Engine
