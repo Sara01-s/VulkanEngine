@@ -2,6 +2,7 @@
 
 #include "camera.hpp"
 #include "device.hpp"
+#include "frame_info.hpp"
 #include "game_object.hpp"
 #include "pipeline.hpp"
 
@@ -20,7 +21,7 @@ namespace Engine {
         RenderSystem(const RenderSystem&) = delete;
         RenderSystem& operator=(const RenderSystem&) = delete;
 
-        void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera);
+        void RenderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects);
 
     private:
         void CreatePipelineLayout();

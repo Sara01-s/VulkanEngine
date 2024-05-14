@@ -1,6 +1,6 @@
 #include "model.hpp"
 
-#include "utils.h"
+#include "utils.hpp"
 
 // libs
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -38,14 +38,8 @@ namespace Engine {
         CreateIndexBuffer(data.Indices);
     }
 
-    Model::~Model() {
-        vkDestroyBuffer(_device.device(), _vertexBuffer, nullptr);
-        vkFreeMemory(_device.device(), _vertexBufferMemory, nullptr);
-
-        if (_hasIndexBuffer) {
-            vkDestroyBuffer(_device.device(), _indexBuffer, nullptr);
-            vkFreeMemory(_device.device(), _indexBufferMemory, nullptr);
-        }
+    Model::~Model() 
+    {
     }
 
     std::unique_ptr<Model> Model::CreateModelFromFile(Device &device, const std::string filepath) {
@@ -56,7 +50,7 @@ namespace Engine {
     }
 
     void Model::Bind(VkCommandBuffer commandBuffer) {
-        VkBuffer buffers[] = { _vertexBuffer };
+        VkBuffer buffers[] = { _vertexBuffer->getBuffer() };
         VkDeviceSize offsets[] = { 0 };
 
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
@@ -64,7 +58,7 @@ namespace Engine {
         if (_hasIndexBuffer) {
             // uint16 = 65,535 vertices
             // uint32 = 4,294,967,295 vertices
-            vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(commandBuffer, _indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
         }
     }
 
@@ -83,34 +77,28 @@ namespace Engine {
         assert(_vertexCount >= 3 && "Vertex count must be at least 3");
 
         VkDeviceSize vertexBufferSize = sizeof(vertices[0]) * _vertexCount;
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
+        uint32_t vertexSize = sizeof(vertices[0]);
 
-        _device.createBuffer (
-            vertexBufferSize,
+        VulkanBuffer stagingBuffer {
+            _device,
+            vertexSize,
+            _vertexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // HOST = CPU, DEVICE = GPU, 1st property makes memory accesible from cpu, 2nd property keeps the cpu and gpu regions consistent (or updated) with each other, if this property is abstent, then we are required to call VkFlushMapMemoryRanges() in order to propagate changes from cpu to gpu.
-            stagingBuffer,
-            stagingBufferMemory
-        );
+        };
 
-        void* indexData;
-        vkMapMemory(_device.device(), stagingBufferMemory, 0, vertexBufferSize, 0, &indexData);
-        memcpy(indexData, vertices.data(), static_cast<size_t>(vertexBufferSize));
-        vkUnmapMemory(_device.device(), stagingBufferMemory);
-        
-        _device.createBuffer (
-            vertexBufferSize,
+        stagingBuffer.map();
+        stagingBuffer.writeToBuffer((void*) vertices.data());
+
+        _vertexBuffer = std::make_unique<VulkanBuffer> (
+            _device,
+            vertexSize,
+            _vertexCount,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            _vertexBuffer,
-            _vertexBufferMemory
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-        _device.copyBuffer(stagingBuffer, _vertexBuffer, vertexBufferSize);
-
-        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
-        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
+        _device.copyBuffer(stagingBuffer.getBuffer(), _vertexBuffer->getBuffer(), vertexBufferSize);
     }
 
     void Model::CreateIndexBuffer(const std::vector<uint32_t> &indices) {
@@ -122,35 +110,28 @@ namespace Engine {
         }
 
         VkDeviceSize indexBufferSize = sizeof(indices[0]) * _indexCount;
+        uint32_t indexSize = sizeof(indices[0]);
 
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-
-        _device.createBuffer (
-            indexBufferSize,
+        VulkanBuffer stagingBuffer {
+            _device,
+            indexSize,
+            _indexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // HOST = CPU, DEVICE = GPU, 1st property makes memory accesible from cpu, 2nd property keeps the cpu and gpu regions consistent (or updated) with each other, if this property is abstent, then we are required to call VkFlushMapMemoryRanges() in order to propagate changes from cpu to gpu.
-            stagingBuffer,
-            stagingBufferMemory
-        );
+        };
 
-        void* indexData;
-        vkMapMemory(_device.device(), stagingBufferMemory, 0, indexBufferSize, 0, &indexData);
-        memcpy(indexData, indices.data(), static_cast<size_t>(indexBufferSize));
-        vkUnmapMemory(_device.device(), stagingBufferMemory);
-        
-        _device.createBuffer (
-            indexBufferSize,
+        stagingBuffer.map();
+        stagingBuffer.writeToBuffer((void*) indices.data());
+
+        _indexBuffer = std::make_unique<VulkanBuffer> (
+            _device,
+            indexSize,
+            _indexCount,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            _indexBuffer,
-            _indexBufferMemory
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-        _device.copyBuffer(stagingBuffer, _indexBuffer, indexBufferSize);
-
-        vkDestroyBuffer(_device.device(), stagingBuffer, nullptr);
-        vkFreeMemory(_device.device(), stagingBufferMemory, nullptr);
+        _device.copyBuffer(stagingBuffer.getBuffer(), _indexBuffer->getBuffer(), indexBufferSize);
     }
 
     std::vector<VkVertexInputBindingDescription> Model::Vertex::GetBindingDescriptions() {
@@ -163,19 +144,12 @@ namespace Engine {
     }
 
     std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescriptions() {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions { 2 }; // 2 attributes per vertex
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions {};
 
-        // position
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(Vertex, Position);
-
-        // color
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(Vertex, Color);
+        attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) });
+        attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Color) });
+        attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) });
+        attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT,    offsetof(Vertex, UV) });
 
         return attributeDescriptions;
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "device.hpp"
+#include "vulkan_buffer.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -58,13 +59,11 @@ namespace Engine {
     private:
         Device& _device;
 
-        VkBuffer _vertexBuffer;
-        VkDeviceMemory _vertexBufferMemory;
+        std::unique_ptr<VulkanBuffer> _vertexBuffer;
         uint32_t _vertexCount;
 
         bool _hasIndexBuffer { false };
-        VkBuffer _indexBuffer;
-        VkDeviceMemory _indexBufferMemory;
+        std::unique_ptr<VulkanBuffer> _indexBuffer;
         uint32_t _indexCount;
     };
     

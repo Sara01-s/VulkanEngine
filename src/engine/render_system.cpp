@@ -5,9 +5,9 @@
 
 namespace Engine {
 
-    struct SimplePushConstantData {
+    struct PushConstantData {
         glm::mat4 Transform { 1.0f };
-        alignas(16) glm::vec3 Color;
+        glm::mat4 NormalMatrix { 1.0f };
     };
     
     RenderSystem::RenderSystem(Device& device, VkRenderPass renderPass) 
@@ -25,7 +25,7 @@ namespace Engine {
         VkPushConstantRange pushConstantRange {};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // We want access to the pushed constant data in both vertex and fragment shader stages.
         pushConstantRange.offset = 0;
-        pushConstantRange.size = sizeof(SimplePushConstantData);
+        pushConstantRange.size = sizeof(PushConstantData);
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -56,27 +56,29 @@ namespace Engine {
         );
     }
 
-    void RenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera) {
-        _pipeline->Bind(commandBuffer);
+    void RenderSystem::RenderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects) {
+        _pipeline->Bind(frameInfo.CommandBuffer);
 
-        auto projectionView = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+        auto projectionView = frameInfo.Camera.GetProjectionMatrix() * frameInfo.Camera.GetViewMatrix();
 
         for (auto& obj : gameObjects) {
-            SimplePushConstantData push {};
-            push.Color = obj.Color;
-            push.Transform = projectionView * obj.Transform.GetMat4();
+            PushConstantData pushConstants {};
+            auto modelMatrix = obj.Transform.GetMat4();
+
+            pushConstants.Transform = projectionView * modelMatrix;
+            pushConstants.NormalMatrix = obj.Transform.GetNormalMatrix();
 
             vkCmdPushConstants (
-                commandBuffer, 
-                _pipelineLayout, 
+                frameInfo.CommandBuffer,
+                _pipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
-                sizeof(SimplePushConstantData),
-                &push
+                sizeof(PushConstantData),
+                &pushConstants
             );
 
-            obj.Model->Bind(commandBuffer);
-            obj.Model->Draw(commandBuffer);
+            obj.Model->Bind(frameInfo.CommandBuffer);
+            obj.Model->Draw(frameInfo.CommandBuffer);
         }
     }
 
