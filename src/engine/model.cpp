@@ -164,6 +164,7 @@ namespace Engine {
 
     std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescriptions() {
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions { 2 }; // 2 attributes per vertex
+
         // position
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
@@ -207,18 +208,11 @@ namespace Engine {
                         modelAttributes.vertices[3 * index.vertex_index + 2]
                     };
 
-                    auto colorIndex = 3 * index.vertex_index + 2;
-
-                    if (colorIndex < modelAttributes.colors.size()) {
-                        vertex.Color = {
-                            modelAttributes.colors[colorIndex - 2],
-                            modelAttributes.colors[colorIndex - 1],
-                            modelAttributes.colors[colorIndex - 0]
-                        };
-                    }
-                    else {
-                        vertex.Color = { 1.0f, 1.0f, 1.0f }; // default color
-                    }
+                    vertex.Color = {
+                        modelAttributes.colors[3 * index.vertex_index + 0],
+                        modelAttributes.colors[3 * index.vertex_index + 1],
+                        modelAttributes.colors[3 * index.vertex_index + 2]
+                    };
                 }
 
                 if (index.normal_index >= 0) {

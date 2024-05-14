@@ -69,12 +69,12 @@ namespace Engine {
     }
 
     void App::LoadGameObjects() {
-        std::shared_ptr<Model> model = Model::CreateModelFromFile(_device, "assets/models/smooth_vase.obj");
+        std::shared_ptr<Model> model = Model::CreateModelFromFile(_device, "assets/models/Tortura.obj");
 
         auto gameObject = GameObject::CreateGameObject();
         gameObject.Model = model;
         gameObject.Transform.Position = { 0.0f, 0.0f, 1.0f };
-        //gameObject.Transform.Scale = { 0.5f, 0.5f, 0.5f };
+        gameObject.Transform.Scale = { 0.05f, 0.05f, 0.05f };
 
         _gameObjects.push_back(std::move(gameObject));
     }
