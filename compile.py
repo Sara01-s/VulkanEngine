@@ -74,8 +74,6 @@ def compile_file(file_path: str, debug = False) -> int:
     return True
 
 def link_file(obj_file_path) -> bool:
-    print(obj_file_path)
-
     obj_files = glob.glob(f'{OBJ_DIR}/**/*.o', recursive=True)
 
     link_command = [
@@ -102,7 +100,9 @@ def link_file(obj_file_path) -> bool:
     return True
 
 def main():
-
+    if not os.path.exists(OBJ_DIR):
+        os.mkdir(OBJ_DIR)
+        
     parser = argparse.ArgumentParser(description='C builder')
     parser.add_argument('--debug', action='store_true', help='Compiles program with debug symbols')
     parser.add_argument('--clean', action='store_true', help='Deletes all object files')
@@ -140,6 +140,7 @@ def main():
     # Compile
     for src_file in src_files:
         compiled_sucessfully = compile_file(src_file, args.debug)
+
         if not compiled_sucessfully:
             return
 
