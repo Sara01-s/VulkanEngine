@@ -14,7 +14,7 @@ namespace Engine {
 
 class SwapChain {
  public:
-  static constexpr int MAX_FRAMES_IN_FLIGHT = 3; // check later
+  static constexpr int MAX_FRAMES_IN_FLIGHT = 2; // check later
 
   SwapChain(Device &deviceRef, VkExtent2D windowExtent);
   SwapChain(Device &deviceRef, VkExtent2D windowExtent, std::shared_ptr<SwapChain> previousSwapChain);

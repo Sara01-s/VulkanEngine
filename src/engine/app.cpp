@@ -35,8 +35,8 @@ namespace Engine {
 
     App::App() {
         _globalPool = LveDescriptorPool::Builder(_device)
-                .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
-                .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+                .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT + 1)
+                .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT + 1)
                 .build();
 
         LoadGameObjects();
@@ -48,7 +48,7 @@ namespace Engine {
 
     void App::Run() {
 
-        std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
+        std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT + 1);
         
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<VulkanBuffer> (
@@ -66,7 +66,7 @@ namespace Engine {
                                 .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // UBO available in all shader stages
                                 .build();
 
-        std::vector<VkDescriptorSet> globalDescriptorSets { SwapChain::MAX_FRAMES_IN_FLIGHT };
+        std::vector<VkDescriptorSet> globalDescriptorSets { SwapChain::MAX_FRAMES_IN_FLIGHT + 1 };
 
         for (int i = 0; i < globalDescriptorSets.size(); i++) {
             auto bufferInfo = uboBuffers[i]->descriptorInfo();
