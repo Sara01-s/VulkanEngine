@@ -1,7 +1,8 @@
 #include "app.hpp"
 
 #include "keyboard_movement.hpp"
-#include "render_system.hpp"
+#include "systems/render_system.hpp"
+#include "systems/point_light_system.hpp"
 #include "camera.hpp"
 #include "vulkan_buffer.hpp"
 
@@ -77,6 +78,7 @@ namespace Engine {
             
 
         RenderSystem renderSystem { _device, _renderer.GetSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+        PointLightSystem pointLightSystem { _device, _renderer.GetSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
         Camera camera {};
         //camera.SetViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
         camera.SetViewTarget(glm::vec3 { 0.0f }, glm::vec3 { 0.0f, 0.0f, 1.0f });
@@ -117,6 +119,7 @@ namespace Engine {
                 _renderer.BeginSwapChainRenderPass(commandBuffer);
 
                 renderSystem.RenderGameObjects(frameInfo);
+                pointLightSystem.Render(frameInfo);
 
                 _renderer.EndSwapChainRenderPass(commandBuffer);
                 _renderer.EndFrame();

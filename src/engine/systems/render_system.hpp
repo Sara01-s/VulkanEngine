@@ -1,10 +1,10 @@
 #pragma once
 
-#include "camera.hpp"
-#include "device.hpp"
-#include "frame_info.hpp"
-#include "game_object.hpp"
-#include "pipeline.hpp"
+#include "../camera.hpp"
+#include "../device.hpp"
+#include "../frame_info.hpp"
+#include "../game_object.hpp"
+#include "../pipeline.hpp"
 
 // std
 #include <memory>

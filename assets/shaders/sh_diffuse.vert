@@ -27,7 +27,7 @@ void main() {
     // Vertex is in model space, light is in world space
     vec4 vertexPositionWorld = push.ModelMatrix * vec4(a_Position, 1.0);
 
-    gl_Position = ubo.ProjectionMatrix * ubo.ViewMatrix * vertexPositionWorld;
+    gl_Position = ubo.ProjectionMatrix * (ubo.ViewMatrix * vertexPositionWorld);
 
     o_FragNormalWorld = normalize(mat3(push.NormalMatrix) * a_Normal);
     o_FragPositionWorld = vertexPositionWorld.xyz;

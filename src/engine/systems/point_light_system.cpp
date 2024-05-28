@@ -1,31 +1,26 @@
-#include "render_system.hpp"
+#include "point_light_system.hpp"
 
 // std
 #include <stdexcept>
 
 namespace Engine {
 
-    struct PushConstantData {
-        glm::mat4 ModelMatrix { 1.0f };
-        glm::mat4 NormalMatrix { 1.0f };
-    };
-    
-    RenderSystem::RenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
+    PointLightSystem::PointLightSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
         : _device(device)
     {
         CreatePipelineLayout(globalSetLayout);
         CreatePipeline(renderPass);
     }
 
-    RenderSystem::~RenderSystem() {
+    PointLightSystem::~PointLightSystem() {
         vkDestroyPipelineLayout(_device.device(), _pipelineLayout, nullptr);
     }
 
-    void RenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout) {
-        VkPushConstantRange pushConstantRange {};
-        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // We want access to the pushed constant data in both vertex and fragment shader stages.
-        pushConstantRange.offset = 0;
-        pushConstantRange.size = sizeof(PushConstantData);
+    void PointLightSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+        // VkPushConstantRange pushConstantRange {};
+        // pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT; // We want access to the pushed constant data in both vertex and fragment shader stages.
+        // pushConstantRange.offset = 0;
+        // pushConstantRange.size = sizeof(PushConstantData);
 
         std::vector<VkDescriptorSetLayout> descriptorSetLayouts { globalSetLayout };
 
@@ -33,15 +28,15 @@ namespace Engine {
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
         pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 1;
-        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
         if (vkCreatePipelineLayout(_device.device(), &pipelineLayoutInfo, nullptr, &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout");
         }
     }
 
-    void RenderSystem::CreatePipeline(VkRenderPass renderPass) {
+    void PointLightSystem::CreatePipeline(VkRenderPass renderPass) {
         assert(_pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout.");
 
         PipelineConfigInfo pipelineConfig {};
@@ -52,13 +47,13 @@ namespace Engine {
 
         _pipeline = std::make_unique<Pipeline> (
             _device,
-            "assets/shaders/test.vert.spv",
-            "assets/shaders/test.frag.spv",
+            "assets/shaders/sh_point_light.vert.spv",
+            "assets/shaders/sh_point_light.frag.spv",
             pipelineConfig
         );
     }
 
-    void RenderSystem::RenderGameObjects(FrameInfo& frameInfo) {
+    void PointLightSystem::Render(FrameInfo& frameInfo) {
         _pipeline->Bind(frameInfo.CommandBuffer);
 
         vkCmdBindDescriptorSets (
@@ -71,29 +66,8 @@ namespace Engine {
             0, nullptr
         );
 
-        for (auto& kv : frameInfo.GameObjectByID) {
-            auto& obj = kv.second; // second = value
+        vkCmdDraw(frameInfo.CommandBuffer, 6, 1 ,0, 0);
 
-            if (obj.Model == nullptr) {
-                continue;
-            }
-
-            PushConstantData pushConstants {};
-            pushConstants.ModelMatrix = obj.Transform.GetMat4();
-            pushConstants.NormalMatrix = obj.Transform.GetNormalMatrix();
-
-            vkCmdPushConstants (
-                frameInfo.CommandBuffer,
-                _pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(PushConstantData),
-                &pushConstants
-            );
-
-            obj.Model->Bind(frameInfo.CommandBuffer);
-            obj.Model->Draw(frameInfo.CommandBuffer);
-        }
     }
 
 } // namespace Engine
