@@ -37,7 +37,7 @@ namespace Engine {
         Renderer _renderer { _window, _device };
 
         std::unique_ptr<LveDescriptorPool> _globalPool {};
-        std::vector<GameObject> _gameObjects;
+        GameObject::Map _gameObjectByID;
     };
 
 } // namespace Engine

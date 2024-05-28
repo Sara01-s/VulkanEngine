@@ -20,7 +20,8 @@
 namespace Engine {
 
     struct GlobalUBO {
-        glm::mat4 ProjectionViewMatrix { 1.0f };
+        glm::mat4 ProjectionMatrix { 1.0f };
+        glm::mat4 ViewMatrix { 1.0f };
         //glm::vec3 LightDirection { glm::normalize(glm::vec3 { 1.0f, -3.0f, -1.0f })};
 
         // using x: red, y: green, z: blue, w: intensity
@@ -61,7 +62,7 @@ namespace Engine {
         }
 
         auto globalSetLayout = LveDescriptorSetLayout::Builder(_device)
-                                .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+                                .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // UBO available in all shader stages
                                 .build();
 
         std::vector<VkDescriptorSet> globalDescriptorSets { SwapChain::MAX_FRAMES_IN_FLIGHT };
@@ -103,18 +104,19 @@ namespace Engine {
 
             if (auto commandBuffer = _renderer.BeginFrame()) {
                 int frameIndex = _renderer.GetFrameIndex();
-                FrameInfo frameInfo { frameIndex, deltaTime, commandBuffer, camera, globalDescriptorSets[frameIndex] };
+                FrameInfo frameInfo { frameIndex, deltaTime, commandBuffer, camera, globalDescriptorSets[frameIndex], _gameObjectByID };
 
                 // Update
                 GlobalUBO ubo {};
-                ubo.ProjectionViewMatrix = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+                ubo.ProjectionMatrix = camera.GetProjectionMatrix();
+                ubo.ViewMatrix = camera.GetViewMatrix();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
                 // Render
                 _renderer.BeginSwapChainRenderPass(commandBuffer);
 
-                renderSystem.RenderGameObjects(frameInfo, _gameObjects);
+                renderSystem.RenderGameObjects(frameInfo);
 
                 _renderer.EndSwapChainRenderPass(commandBuffer);
                 _renderer.EndFrame();
@@ -125,28 +127,28 @@ namespace Engine {
     }
 
     void App::LoadGameObjects() {
-        std::shared_ptr<Model> model = Model::CreateModelFromFile(_device, "assets/models/monkey.obj");
+        std::shared_ptr<Model> monkeyModel = Model::CreateModelFromFile(_device, "assets/models/monkey.obj");
 
-        auto gameObject = GameObject::CreateGameObject();
-        gameObject.Model = model;
-        gameObject.Transform.Position = { 0.0f, 0.0f, 1.0f };
-        gameObject.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+        auto monkey = GameObject::CreateGameObject();
+        monkey.Model = monkeyModel;
+        monkey.Transform.Position = { 0.0f, 0.0f, 1.0f };
+        monkey.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
-        std::shared_ptr<Model> model2 = Model::CreateModelFromFile(_device, "assets/models/smooth_vase.obj");
-        auto gameObject2 = GameObject::CreateGameObject();
-        gameObject2.Model = model2;
-        gameObject2.Transform.Position = { 1.5f, 0.0f, 1.0f };
-        gameObject2.Transform.Scale = { 1.0f, 1.0f, 1.0f };
+        std::shared_ptr<Model> smoothVaseModel = Model::CreateModelFromFile(_device, "assets/models/smooth_vase.obj");
+        auto smoothVase = GameObject::CreateGameObject();
+        smoothVase.Model = smoothVaseModel;
+        smoothVase.Transform.Position = { 1.5f, 0.0f, 1.0f };
+        smoothVase.Transform.Scale = { 1.0f, 1.0f, 1.0f };
 
-        std::shared_ptr<Model> quad = Model::CreateModelFromFile(_device, "assets/models/quad.obj");
+        std::shared_ptr<Model> quadModel = Model::CreateModelFromFile(_device, "assets/models/quad.obj");
         auto floor = GameObject::CreateGameObject();
-        floor.Model = quad;
+        floor.Model = quadModel;
         floor.Transform.Position = { 0.0f, 0.2f, 0.0f };
         floor.Transform.Scale = { 3.0f, 1.0f, 3.0f };
 
-        _gameObjects.push_back(std::move(gameObject));
-        _gameObjects.push_back(std::move(gameObject2));
-        _gameObjects.push_back(std::move(floor));
+        _gameObjectByID.emplace(monkey.GetID(), std::move(monkey));
+        _gameObjectByID.emplace(smoothVase.GetID(), std::move(smoothVase));
+        _gameObjectByID.emplace(floor.GetID(), std::move(floor));
     }
 
 } // namespace Engine

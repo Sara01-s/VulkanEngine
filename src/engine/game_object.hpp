@@ -7,6 +7,7 @@
 
 // std
 #include <memory>
+#include <unordered_map>
 
 namespace Engine {
 
@@ -27,6 +28,7 @@ namespace Engine {
 
     public:
         using ID = unsigned int;
+        using Map = std::unordered_map<ID, GameObject>;
 
         static GameObject CreateGameObject() {
             static ID currentId = 0;

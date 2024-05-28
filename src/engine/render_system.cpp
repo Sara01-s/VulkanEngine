@@ -58,7 +58,7 @@ namespace Engine {
         );
     }
 
-    void RenderSystem::RenderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects) {
+    void RenderSystem::RenderGameObjects(FrameInfo& frameInfo) {
         _pipeline->Bind(frameInfo.CommandBuffer);
 
         vkCmdBindDescriptorSets (
@@ -71,7 +71,13 @@ namespace Engine {
             0, nullptr
         );
 
-        for (auto& obj : gameObjects) {
+        for (auto& kv : frameInfo.GameObjectByID) {
+            auto& obj = kv.second; // second = value
+
+            if (obj.Model == nullptr) {
+                continue;
+            }
+
             PushConstantData pushConstants {};
             pushConstants.ModelMatrix = obj.Transform.GetMat4();
             pushConstants.NormalMatrix = obj.Transform.GetNormalMatrix();
