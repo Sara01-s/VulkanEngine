@@ -48,6 +48,7 @@ namespace Engine {
         CreateShaderModule(vertSourceCode, &_vertShaderModule);
         CreateShaderModule(fragSourceCode, &_fragShaderModule);
 
+        // Vertex shader render stage setup
         VkPipelineShaderStageCreateInfo shaderStages[2];
         shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -57,6 +58,7 @@ namespace Engine {
         shaderStages[0].pNext = nullptr;
         shaderStages[0].pSpecializationInfo = nullptr;
 
+        // Fragment shader render stage setup
         shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         shaderStages[1].module = _fragShaderModule;
@@ -98,7 +100,7 @@ namespace Engine {
 
         if (vkCreateGraphicsPipelines(_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_graphicsPipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline.");
-        }   
+        }
 
     }
 
@@ -120,16 +122,19 @@ namespace Engine {
 
     void Pipeline::InitializeDefaultPipelineConfig(PipelineConfigInfo& configInfo) {
 
+        // Input Assembly render stage setup
         configInfo.InputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         configInfo.InputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         configInfo.InputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
 
+        // Viewport setup
         configInfo.ViewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         configInfo.ViewportInfo.viewportCount = 1;
         configInfo.ViewportInfo.pViewports = nullptr;
         configInfo.ViewportInfo.scissorCount = 1;
         configInfo.ViewportInfo.pScissors = nullptr;
         
+        // Rasterization render stage setup
         configInfo.RasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         configInfo.RasterizationInfo.depthClampEnable = VK_FALSE;
         configInfo.RasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
@@ -142,6 +147,7 @@ namespace Engine {
         configInfo.RasterizationInfo.depthBiasClamp = 0.0f;           // Optional
         configInfo.RasterizationInfo.depthBiasSlopeFactor = 0.0f;     // Optional
         
+        // MSAA Setup (ref: https://vulkan-tutorial.com/Multisampling)
         configInfo.MultisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         configInfo.MultisampleInfo.sampleShadingEnable = VK_FALSE;
         configInfo.MultisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -150,6 +156,7 @@ namespace Engine {
         configInfo.MultisampleInfo.alphaToCoverageEnable = VK_FALSE;  // Optional
         configInfo.MultisampleInfo.alphaToOneEnable = VK_FALSE;       // Optional
         
+        // Color blending render stage setup
         configInfo.ColorBlendAttachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
             VK_COLOR_COMPONENT_A_BIT;
@@ -171,6 +178,7 @@ namespace Engine {
         configInfo.ColorBlendInfo.blendConstants[2] = 0.0f;  // Optional
         configInfo.ColorBlendInfo.blendConstants[3] = 0.0f;  // Optional
         
+        // Stencil setup
         configInfo.DepthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         configInfo.DepthStencilInfo.depthTestEnable = VK_TRUE;
         configInfo.DepthStencilInfo.depthWriteEnable = VK_TRUE;
@@ -182,10 +190,12 @@ namespace Engine {
         configInfo.DepthStencilInfo.front = {};  // Optional
         configInfo.DepthStencilInfo.back = {};   // Optional
 
+        // Idk setup
         configInfo.DynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
         configInfo.DynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         configInfo.DynamicStateInfo.pDynamicStates = configInfo.DynamicStateEnables.data();
         configInfo.DynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.DynamicStateEnables.size());
         configInfo.DynamicStateInfo.flags = 0;
     }
+
 } // namespace Engine

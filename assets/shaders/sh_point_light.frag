@@ -1,7 +1,6 @@
 #version 450
 
 layout (location = 0) in vec2 i_FragOffset;
-
 layout (location = 0) out vec4 o_PixelColor;
 
 layout (set = 0, binding = 0) uniform GlobalUbo {
@@ -13,12 +12,12 @@ layout (set = 0, binding = 0) uniform GlobalUbo {
 } ubo;
 
 void main() {
-    float dis = sqrt(dot(i_FragOffset, i_FragOffset));
+    float dst = sqrt(dot(i_FragOffset, i_FragOffset)); // dot (v, v) = length(i_FragOffset^2)
 
-    if (dis >= 1.0) {
+    if (dst >= 1.0) {
         discard;
     }
 
-    o_PixelColor = vec4(ubo.LightColor.xyz, 1.0);
+    o_PixelColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
 
