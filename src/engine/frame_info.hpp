@@ -12,6 +12,7 @@ namespace Engine {
         float DeltaTime { 0.0f };
         VkCommandBuffer CommandBuffer;
         Camera& Camera;
+        VkDescriptorSet GlobalDescriptorSet;
     };
     
 } // namespace Engine

@@ -1,6 +1,7 @@
 #pragma once
 
 // libs
+#include "descriptor.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
 #include "window.hpp"
@@ -35,6 +36,7 @@ namespace Engine {
         Device _device { _window };
         Renderer _renderer { _window, _device };
 
+        std::unique_ptr<LveDescriptorPool> _globalPool {};
         std::vector<GameObject> _gameObjects;
     };
 

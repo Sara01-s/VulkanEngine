@@ -15,7 +15,7 @@ namespace Engine {
     class RenderSystem {
 
     public:
-        RenderSystem(Device& device, VkRenderPass renderPass);
+        RenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~RenderSystem();
 
         RenderSystem(const RenderSystem&) = delete;
@@ -24,7 +24,7 @@ namespace Engine {
         void RenderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects);
 
     private:
-        void CreatePipelineLayout();
+        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);
     
     private:

@@ -20,7 +20,7 @@ namespace Engine {
 
     void Renderer::CreateCommandBuffers() {
 
-        _commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT + 1); // FIXME - estudiar luego, esto no debería tener + 1, pero sin él, causa un segfault
+        _commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT); // FIXME - estudiar luego, esto no debería tener + 1, pero sin él, causa un segfault
 
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
