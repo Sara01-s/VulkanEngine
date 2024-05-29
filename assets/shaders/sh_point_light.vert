@@ -19,7 +19,7 @@ layout (set = 0, binding = 0) uniform GlobalUbo {
     vec4 LightColor; // w is intensity
 } ubo;
 
-const float LIGHT_RADIUS = 0.1;
+const float LIGHT_RADIUS = 1.0;
 
 void main() {
     o_FragOffset = OFFSETS[gl_VertexIndex];
@@ -31,5 +31,5 @@ void main() {
                                 + LIGHT_RADIUS * o_FragOffset.x * cameraRightWorld;
                                 + LIGHT_RADIUS * o_FragOffset.y * cameraUpWorld;
 
-    gl_Position = ubo.ProjectionMatrix * (ubo.ViewMatrix * vec4(vertexPositionWorld, 1.0));
+    gl_Position = ubo.ProjectionMatrix * ubo.ViewMatrix * vec4(vertexPositionWorld, 1.0);
 }

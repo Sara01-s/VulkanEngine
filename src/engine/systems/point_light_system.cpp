@@ -42,6 +42,8 @@ namespace Engine {
         PipelineConfigInfo pipelineConfig {};
         Pipeline::InitializeDefaultPipelineConfig(pipelineConfig); // it is important to use swapchains's width and height since it doesn't necessarily match the window's, on high pixel density display such as RenderSystem's retina displays, the window mesured in screen coordinates is smaller than the number of pixel, the window contains.
 
+        pipelineConfig.AttributeDescriptions.clear();
+        pipelineConfig.BindingDescriptions.clear();
         pipelineConfig.RenderPass = renderPass;
         pipelineConfig.PipelineLayout = _pipelineLayout;
 
@@ -60,7 +62,7 @@ namespace Engine {
             frameInfo.CommandBuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             _pipelineLayout,
-            0, 
+            0,  
             1,
             &frameInfo.GlobalDescriptorSet,
             0, nullptr

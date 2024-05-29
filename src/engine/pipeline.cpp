@@ -67,8 +67,8 @@ namespace Engine {
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        auto bindingDescriptions = Model::Vertex::GetBindingDescriptions();
-        auto attributeDescriptions = Model::Vertex::GetAttributeDescriptions();
+        auto& bindingDescriptions = configInfo.BindingDescriptions;
+        auto& attributeDescriptions = configInfo.AttributeDescriptions;
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -196,6 +196,9 @@ namespace Engine {
         configInfo.DynamicStateInfo.pDynamicStates = configInfo.DynamicStateEnables.data();
         configInfo.DynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.DynamicStateEnables.size());
         configInfo.DynamicStateInfo.flags = 0;
+
+        configInfo.BindingDescriptions = Model::Vertex::GetBindingDescriptions();
+        configInfo.AttributeDescriptions = Model::Vertex::GetAttributeDescriptions();
     }
 
 } // namespace Engine
