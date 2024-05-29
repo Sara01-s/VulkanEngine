@@ -74,4 +74,15 @@ namespace Engine {
         };
     }
 
+    GameObject GameObject::CreatePointLight(float intensity, float radius, glm::vec3 color) {
+        auto gameObject = GameObject::CreateGameObject();
+        
+        gameObject.Color = color;
+        gameObject.Transform.Scale.x = radius;
+        gameObject.PointLight = std::make_unique<PointLightComponent>();
+        gameObject.PointLight->LightIntensity = intensity;
+
+        return gameObject;
+    }
+
 } // namespace Engine

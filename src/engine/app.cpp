@@ -20,17 +20,6 @@
 
 namespace Engine {
 
-    struct GlobalUBO {
-        glm::mat4 ProjectionMatrix { 1.0f };
-        glm::mat4 ViewMatrix { 1.0f };
-        //glm::vec3 LightDirection { glm::normalize(glm::vec3 { 1.0f, -3.0f, -1.0f })};
-
-        // using x: red, y: green, z: blue, w: intensity
-        glm::vec4 AmbientColor { 1.0f, 1.0f, 1.0f, 0.25f };
-        alignas(16) glm::vec3 LightPosition { -1.0f };
-        alignas(16) glm::vec4 LightColor { 1.0f };                          
-    };
-
     constexpr float MAX_DELTA_TIME = 0.3F;
 
     App::App() {
@@ -114,6 +103,9 @@ namespace Engine {
                 GlobalUBO ubo {};
                 ubo.ProjectionMatrix = camera.GetProjectionMatrix();
                 ubo.ViewMatrix = camera.GetViewMatrix();
+
+                pointLightSystem.Update(frameInfo, ubo);
+
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
@@ -145,8 +137,12 @@ namespace Engine {
         floor.Transform.Position = { 0.0f, 0.2f, 0.0f };
         floor.Transform.Scale = { 3.0f, -1.0f, 3.0f };
 
+        auto pointLight = GameObject::CreatePointLight(1.2f);
+
+        // After moved, all local gameobject variables are invalid.
         _gameObjectByID.emplace(monkey.GetID(), std::move(monkey));
         _gameObjectByID.emplace(floor.GetID(), std::move(floor));
+        _gameObjectByID.emplace(pointLight.GetID(), std::move(pointLight));
     }
 
 } // namespace Engine

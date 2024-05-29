@@ -9,12 +9,17 @@ layout (location = 0) out vec3 o_FragColor;
 layout (location = 1) out vec3 o_FragPositionWorld;
 layout (location = 2) out vec3 o_FragNormalWorld;
 
+struct PointLight {
+    vec4 Position; // ignore w
+    vec4 Color;    // w is intensity
+};
+
 layout (set = 0, binding = 0) uniform GlobalUbo {
     mat4 ProjectionMatrix;
     mat4 ViewMatrix;
     vec4 AmbientLightColor; // w is intensity
-    vec3 LightPosition;
-    vec4 LightColor; // w is intensity
+    PointLight PointLights[10]; // Study and use <<Specialization Constants>> instead of hardcoding.
+    int ActiveLightsCount;
 } ubo;
 
 layout (push_constant) uniform PushConstants { // 128 bytes, limit for supporting all GPUs
