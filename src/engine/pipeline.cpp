@@ -201,4 +201,19 @@ namespace Engine {
         configInfo.AttributeDescriptions = Model::Vertex::GetAttributeDescriptions();
     }
 
+    void Pipeline::EnableAlphaBlending(PipelineConfigInfo &configInfo) {
+        // Color blending render stage setup
+        configInfo.ColorBlendAttachment.blendEnable = VK_TRUE;
+
+        configInfo.ColorBlendAttachment.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+            VK_COLOR_COMPONENT_A_BIT;
+        configInfo.ColorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        configInfo.ColorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        configInfo.ColorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+        configInfo.ColorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        configInfo.ColorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        configInfo.ColorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    }
+
 } // namespace Engine

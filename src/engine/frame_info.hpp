@@ -18,9 +18,11 @@ namespace Engine {
     struct GlobalUBO {
         glm::mat4 ProjectionMatrix { 1.0f };
         glm::mat4 ViewMatrix { 1.0f };
+        glm::mat4 InverseViewMatrix { 1.0f }; // Camera to world
         //glm::vec3 LightDirection { glm::normalize(glm::vec3 { 1.0f, -3.0f, -1.0f })};
 
         // using x: red, y: green, z: blue, w: intensity
+
         glm::vec4 AmbientColor { 1.0f, 1.0f, 1.0f, 0.25f };
         PointLight PointLights[MAX_LIGHTS];
         int ActiveLightsCount { 0 };

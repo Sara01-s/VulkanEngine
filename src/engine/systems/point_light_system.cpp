@@ -2,6 +2,7 @@
 
 // std
 #include <stdexcept>
+#include <map>
 
 namespace Engine {
 
@@ -47,6 +48,7 @@ namespace Engine {
 
         PipelineConfigInfo pipelineConfig {};
         Pipeline::InitializeDefaultPipelineConfig(pipelineConfig); // it is important to use swapchains's width and height since it doesn't necessarily match the window's, on high pixel density display such as RenderSystem's retina displays, the window mesured in screen coordinates is smaller than the number of pixel, the window contains.
+        Pipeline::EnableAlphaBlending(pipelineConfig);
 
         pipelineConfig.AttributeDescriptions.clear();
         pipelineConfig.BindingDescriptions.clear();
@@ -82,6 +84,22 @@ namespace Engine {
     }
 
     void PointLightSystem::Render(FrameInfo &frameInfo) {
+        // Sort lights
+        std::map<float, GameObject::ID> sortedLights;
+
+        for (auto& kv : frameInfo.GameObjectByID) {
+            auto& gameObject = kv.second;
+
+            if (gameObject.PointLight == nullptr) {
+                continue;
+            }
+
+            auto dstToPointLight = frameInfo.Camera.GetPosition() - gameObject.Transform.Position;
+            float dstSquared = glm::dot(dstToPointLight, dstToPointLight);
+
+            sortedLights[dstSquared] = gameObject.GetID();
+        }
+
         _pipeline->Bind(frameInfo.CommandBuffer);
 
         vkCmdBindDescriptorSets (
@@ -94,13 +112,10 @@ namespace Engine {
             0, nullptr
         );
 
-        for (auto& kv: frameInfo.GameObjectByID) {
-            auto& gameObject = kv.second;
+        // Iterate through sorted lights in reverse order
+        for (auto it = sortedLights.rbegin(); it != sortedLights.rend(); it++) {
 
-            if (gameObject.PointLight == nullptr) {
-                continue;
-            }
-
+            auto& gameObject = frameInfo.GameObjectByID.at(it->second);
 
             PointLightPushContants push {};
             push.Position = glm::vec4(gameObject.Transform.Position, 1.0f);

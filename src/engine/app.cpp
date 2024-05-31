@@ -103,6 +103,7 @@ namespace Engine {
                 GlobalUBO ubo {};
                 ubo.ProjectionMatrix = camera.GetProjectionMatrix();
                 ubo.ViewMatrix = camera.GetViewMatrix();
+                ubo.InverseViewMatrix = camera.GetInverseViewMatrix();
 
                 pointLightSystem.Update(frameInfo, ubo);
 

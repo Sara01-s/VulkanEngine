@@ -25,10 +25,18 @@ namespace Engine {
             return _viewMatrix;
         }
 
+        const glm::mat4& GetInverseViewMatrix() const {
+            return _inverseViewMatrix;
+        }
+
+        const glm::vec3 GetPosition() const {
+            return glm::vec3(_inverseViewMatrix[3]);
+        }
+
     private:
         glm::mat4 _projectionMatrix { 1.0f };
         glm::mat4 _viewMatrix { 1.0f };
-
+        glm::mat4 _inverseViewMatrix { 1.0f };
     };
     
 } // namespace Engine

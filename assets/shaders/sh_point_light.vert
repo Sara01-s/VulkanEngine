@@ -19,6 +19,7 @@ struct PointLight {
 layout (set = 0, binding = 0) uniform GlobalUbo {
     mat4 ProjectionMatrix;
     mat4 ViewMatrix;
+    mat4 InverseViewMatrix;
     vec4 AmbientLightColor; // w is intensity
     PointLight PointLights[10]; // Study and use <<Specialization Constants>> instead of hardcoding.
     int ActiveLightsCount;
